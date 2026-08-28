@@ -6,6 +6,31 @@ DraftIQ is an end-to-end football analytics project designed to identify wide re
 
 > **Decision question:** Which WR prospects are likely to outperform their draft position, and what parts of their profile drive that projection?
 
+[![tests](https://github.com/paarthkeswani-droid/DraftIQ/actions/workflows/ci.yml/badge.svg)](https://github.com/paarthkeswani-droid/DraftIQ/actions/workflows/ci.yml)
+
+## Portfolio demo
+
+DraftIQ includes a deterministic **synthetic** data generator, making the complete workflow reviewable without downloading or redistributing proprietary prospect data.
+
+```bash
+pip install -r requirements.txt
+make demo
+streamlit run app.py
+```
+
+The demo creates 210 fictional WR prospects across seven draft classes, joins their first three synthetic NFL seasons, engineers production-share and athletic features, compares Elastic Net and Gradient Boosting, holds out the entire 2024 class for time-based evaluation, and builds a model-vs-market sleeper board.
+
+### Example results
+
+On the committed synthetic demo, Elastic Net was selected by cross-validation and achieved **3,960 MAE**, **4,813 RMSE**, and **0.59 R-squared** on the held-out 2024 draft class. These numbers demonstrate the pipeline and should not be interpreted as real-world model performance.
+
+| Time-based holdout | Model-vs-market sleeper board |
+|---|---|
+| ![Predicted versus actual synthetic NFL value](outputs/predicted_vs_actual.png) | ![Top synthetic receiver sleepers](outputs/sleeper_board.png) |
+
+Explore the generated [model metrics](outputs/model_metrics.json), [feature importance](outputs/feature_importance.csv), [WR rankings](outputs/wr_rankings.csv), and [similarity results](outputs/similar_players.csv). The Streamlit dashboard adds an interactive class-specific sleeper board, prospect explorer, and feature-intelligence view.
+
+
 ## What this project demonstrates
 
 - Reproducible public-data ingestion from the nflverse ecosystem

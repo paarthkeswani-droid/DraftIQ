@@ -1,0 +1,19 @@
+{
+  "selected_model": "elastic_net",
+  "validation_split": "time-based holdout: 2024 draft class",
+  "models": {
+    "elastic_net": {
+      "cv_mae": 3364.071363200398,
+      "mae": 3959.934134120776,
+      "rmse": 4813.0891285934,
+      "r2": 0.5870193200653829
+    },
+    "gradient_boosting": {
+      "cv_mae": 4000.7219690286292,
+      "mae": 4116.6721293277105,
+      "rmse": 5036.136130626228,
+      "r2": 0.547855920148397
+    }
+  },
+  "n_rows": 210
+}
