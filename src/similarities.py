@@ -1,4 +1,5 @@
-"""Find closest historical WR profiles."""
+"""Find closest historical wide receiver prospect profiles."""
+from __future__ import annotations
 import argparse
 from pathlib import Path
 import pandas as pd
@@ -7,16 +8,19 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 from features import FEATURES
 
-ROOT=Path(__file__).resolve().parents[1]; DATA=ROOT/"data"/"processed"/"wr_model_data.csv"; OUT=ROOT/"outputs"
+
+def find_similar_players(data: pd.DataFrame, player: str, top_n: int=10) -> pd.DataFrame:
+    hits=data.index[data.player.str.casefold()==player.casefold()].tolist()
+    if not hits: raise ValueError(f"Player not found: {player}")
+    matrix=SimpleImputer(strategy="median").fit_transform(data[FEATURES]); matrix=StandardScaler().fit_transform(matrix); idx=hits[-1]; scores=cosine_similarity(matrix[[idx]],matrix).ravel()
+    cols=[c for c in ["player","draft_year","draft_pick","college","nfl_value"] if c in data]; result=data[cols].copy(); result["similarity"]=scores
+    return result.drop(index=idx).sort_values("similarity",ascending=False).head(top_n).reset_index(drop=True)
+
 
 def main():
-    p=argparse.ArgumentParser(); p.add_argument("--player",required=True); p.add_argument("--top",type=int,default=5); a=p.parse_args()
-    df=pd.read_csv(DATA).reset_index(drop=True)
-    if not all(c in df for c in FEATURES): raise ValueError("Add data/raw/college_wr.csv and rebuild to enable production/athletic comparisons.")
-    hits=df.index[df.player.str.lower()==a.player.lower()].tolist()
-    if not hits: raise ValueError(f"Player not found: {a.player}")
-    idx=hits[0]; X=StandardScaler().fit_transform(SimpleImputer(strategy="median").fit_transform(df[FEATURES])); sims=cosine_similarity(X[idx:idx+1],X)[0]
-    order=[i for i in sims.argsort()[::-1] if i!=idx][:a.top]; cols=["player","draft_year","draft_pick","nfl_value"]
-    comps=df.loc[order,cols].copy(); comps["similarity"]=[round(float(sims[i]),3) for i in order]; OUT.mkdir(exist_ok=True); comps.to_csv(OUT/"similar_players.csv",index=False); print(comps.to_string(index=False))
+    parser=argparse.ArgumentParser(description=__doc__); parser.add_argument("--player",required=True); parser.add_argument("--top",type=int,default=10); parser.add_argument("--data",type=Path,default=Path("data/processed/wr_model_data.csv")); parser.add_argument("--output",type=Path,default=Path("outputs/similar_players.csv")); args=parser.parse_args()
+    result=find_similar_players(pd.read_csv(args.data),args.player,args.top); args.output.parent.mkdir(parents=True,exist_ok=True); result.to_csv(args.output,index=False); print(result.to_string(index=False))
+
 
 if __name__=="__main__": main()
+
